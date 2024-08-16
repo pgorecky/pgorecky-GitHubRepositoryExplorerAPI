@@ -21,7 +21,7 @@ public class GitHubExplorerController {
     private final GitHubExplorerService gitHubExplorerService;
 
     @GetMapping("/users/{username}")
-    public ResponseEntity<List<GitHubRepository>> listUserRepositoriesV2(@PathVariable String username) {
+    public ResponseEntity<List<GitHubRepository>> listUserRepositories(@PathVariable String username) {
         log.info("Fetching repositories for user: {}", username);
 
         return ResponseEntity.ok(gitHubExplorerService.fetchUserRepositories(username).block());

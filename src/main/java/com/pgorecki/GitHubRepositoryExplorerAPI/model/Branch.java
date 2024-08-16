@@ -10,6 +10,7 @@ public class Branch {
 
     @JsonProperty("name")
     private String name;
+
     @JsonProperty("commit")
     private Commit commit;
 
