@@ -3,8 +3,10 @@ package com.pgorecki.GitHubRepositoryExplorerAPI.service;
 import com.pgorecki.GitHubRepositoryExplorerAPI.model.Branch;
 import com.pgorecki.GitHubRepositoryExplorerAPI.model.GitHubRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,6 +22,12 @@ import static org.mockito.Mockito.when;
 @AutoConfigureWebTestClient
 public class GitHubExplorerServiceTest {
 
+    @Autowired
+    private GitHubExplorerService gitHubExplorerService;
+
+    @MockBean
+    private WebClient webClient;
+
     @Test
     public void testGetUserRepositories() {
         String username = "testUser";
@@ -32,21 +40,15 @@ public class GitHubExplorerServiceTest {
         forkRepository.setName("testForkRepository");
         forkRepository.setFork(true);
 
-        WebClient.Builder webClientBuilder = mock(WebClient.Builder.class);
-        WebClient webClient = mock(WebClient.class);
         WebClient.RequestHeadersUriSpec requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
         WebClient.RequestHeadersSpec requestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
         WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
         Flux<GitHubRepository> flux = Flux.just(repository, forkRepository);
 
-        when(webClientBuilder.baseUrl(anyString())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToFlux(GitHubRepository.class)).thenReturn(flux);
-
-        GitHubExplorerService gitHubExplorerService = new GitHubExplorerService(webClientBuilder);
 
         Mono<List<GitHubRepository>> result = gitHubExplorerService.getUserRepositories(username);
 
@@ -68,20 +70,15 @@ public class GitHubExplorerServiceTest {
         branch.setName("main");
         Branch[] branches = { branch };
 
-        WebClient.Builder webClientBuilder = mock(WebClient.Builder.class);
-        WebClient webClient = mock(WebClient.class);
         WebClient.RequestHeadersUriSpec requestHeadersUriSpec = mock(WebClient.RequestHeadersUriSpec.class);
         WebClient.RequestHeadersSpec requestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
         WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
 
-        when(webClientBuilder.baseUrl(anyString())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString(), anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToFlux(Branch.class)).thenReturn(Flux.fromArray(branches));
 
-        GitHubExplorerService gitHubExplorerService = new GitHubExplorerService(webClientBuilder);
         List<GitHubRepository> repositories = List.of(repo);
 
         gitHubExplorerService.setRepositoriesBranches(repositories, username).block();
